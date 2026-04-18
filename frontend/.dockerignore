@@ -1,0 +1,17 @@
+node_modules
+.next
+coverage
+.env
+.env.*
+*.log
+.git
+.gitignore
+.DS_Store
+**/*.spec.ts
+**/*.spec.tsx
+jest.config.ts
+jest.setup.ts
+README.md
+AI_JOURNEY.md
+AGENTS.md
+.cursor

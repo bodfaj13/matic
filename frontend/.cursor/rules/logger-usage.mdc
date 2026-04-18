@@ -1,0 +1,24 @@
+---
+description: Use the shared Next.js logger instead of raw console in the frontend app.
+globs: frontend/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Logger usage (frontend)
+
+- Do not use `console.log`, `console.info`, `console.debug`, `console.warn`, or `console.error` in application code. The only place raw `console.*` is acceptable is inside `app/utils/logger.ts`.
+- Import from `@/app/utils/logger`:
+  - `log`, `logInfo`, `logDebug` — verbose messages (development, or when `NEXT_PUBLIC_APP_ENV` is `local` or `test`)
+  - `logWarn` — warnings (same gating as above)
+  - `logError` — always emitted (including production)
+  - `logGroup` / `logGroupEnd` — grouped logs (same gating as verbose)
+
+## Examples
+
+- Replace `console.log('payload', payload)` with `logInfo('payload', payload)`.
+- Replace `console.warn('retrying', meta)` with `logWarn('retrying', meta)`.
+- Replace `console.error('failed', err)` with `logError('failed', err)`.
+
+## Rationale
+
+Keeps production logs quiet while preserving errors and allowing structured local debugging.

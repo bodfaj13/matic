@@ -1,0 +1,36 @@
+---
+description: API client and TanStack Query layout under lib/api for the Next.js frontend.
+globs: frontend/lib/api/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# lib/api patterns (frontend)
+
+Optional checklist: `frontend/.cursor/skills/api-patterns/SKILL.md`.
+
+Before adding new domains, axios calls, or hooks under `lib/api`, follow the sections below.
+
+## Folder structure
+
+- **Domain folders**: each domain gets its own folder (e.g. `triage`, `auth`, `notifications`).
+- **Files per domain**:
+  - `index.ts` — raw HTTP calls only (no React)
+  - `types.ts` — request/response/payload types
+  - `use-<domain>.ts` — React Query hooks wrapping `index.ts`
+
+## Shared utilities
+
+- **HTTP client**: one shared client (e.g. `lib/api/axios.ts`); do not create new axios instances per domain.
+- **Responses**: use `BaseResponse<T>` from `lib/api/types.ts` where the backend wraps payloads that way.
+- **Pagination**: use shared `PaginatedRequest` / `PaginatedResponse<T>` when the endpoint is paginated.
+
+## New domain checklist
+
+1. Add `lib/api/<domain>/index.ts`, `types.ts`, `use-<domain>.ts`.
+2. Put request/response types in `types.ts`; reuse shared wrappers where applicable.
+3. In `index.ts`, import the shared client; export plain async functions; no React Query.
+4. In `use-<domain>.ts`, use `useQuery` / `useMutation` from `@tanstack/react-query`, small typed params, stable `queryKey`s.
+
+## Field validation errors in UI
+
+- Use `getFieldErrorsFromApiResponse` from `lib/api/types.ts` in form `catch` blocks (see **api-field-errors**). Do not assume errors are only at `response.data.errors`.

@@ -1,0 +1,36 @@
+---
+description: Smart Triage UI structure—App Router segments, feature folders, and domain boundaries for the Next frontend.
+globs: frontend/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Smart Triage frontend architecture
+
+## Routes (`app/`)
+
+- Queue: e.g. `app/(dashboard)/triage/page.tsx`
+- Case detail: e.g. `app/(dashboard)/triage/[caseId]/page.tsx`
+- Intake / analytics: e.g. `app/(dashboard)/intake/page.tsx`, `app/(dashboard)/analytics/page.tsx`
+- Use `app/api/*` only for Next Route Handlers the frontend truly owns.
+
+## Feature modules (colocate with routes)
+
+Prefer under `frontend/features/` (or `src/features/` if you introduce `src/`):
+
+- `intake`, `triage-queue`, `case-detail`, `classification`, `escalation`, `analytics`
+- Shared: `components/triage/`, `lib/`, `types/`, `services/`
+
+## Domain boundaries
+
+- **intake**: capture, validation, files, initial metadata
+- **triage-queue**: filters, priority, assignment, bulk actions
+- **case-detail**: timeline, notes, evidence, decision log
+- **classification**: severity, category, risk tags
+- **escalation**: SLA, ownership transfer, breaches
+- **analytics**: throughput, MTTR, SLA, backlog
+
+## Vertical slice first
+
+1. Triage queue route + UI
+2. Case detail route + UI
+3. Shared triage types + API/service layer—then add dependencies as needed.

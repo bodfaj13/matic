@@ -43,7 +43,7 @@ First build takes ~2-3 min (npm installs + Next build); subsequent runs reuse th
 
 ### Run without Docker
 
-1. Start MongoDB and Redis, configure and run the API from `backend/` (see backend README). Use a dedicated API port (e.g. `3001`) if the Next dev server uses `3000`.
+1. Start MongoDB and Redis. From `backend/`, copy `.env.example` to `.env`, fill in `JWT_SECRET`, `AGENT_REGISTRATION_SECRET`, and `OPENAI_API_KEY`, then `npm install` and `npm run start:dev`. Use a dedicated API port (e.g. `PORT=3001`) if the Next dev server uses `3000`.
 2. From `frontend/`, copy `.env.example` to `.env.local`, set `NEXT_PUBLIC_API_BASE_URL` to match the API (and `AGENT_REGISTRATION_SECRET` if you use agent self-registration via `app/api/register-proxy`), then `npm install` and `npm run dev`.
 
 ---

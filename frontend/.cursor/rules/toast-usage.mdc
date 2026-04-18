@@ -1,0 +1,38 @@
+---
+description: Centralize toast UI through helpers once sonner (or similar) is added—avoid ad-hoc toast imports.
+globs: frontend/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Toast usage (frontend)
+
+This app does not yet ship `sonner` or `toast-helpers`. When you add notifications:
+
+- Add a single module (e.g. `app/utils/toast-helpers.ts`) that wraps your toast library.
+- Do **not** import `toast` from `sonner` (or equivalent) directly across components; import helpers only.
+
+## Intended helpers (match before merge)
+
+- `showError(message)` — failures / negative outcomes
+- `showSuccess(message)` — successful outcomes
+- `showWarning(message)` — non-blocking warnings
+- `showInfo(message)` — neutral information
+- `showLoading(message)` — long-running actions
+- `showPromise(promise, { loading, success, error })` — lifecycle toasts
+
+## Icon consistency
+
+Keep icon sizing and choice inside the helpers so screens stay visually consistent.
+
+## Example (after helpers exist)
+
+```tsx
+import { showError, showSuccess } from '@/app/utils/toast-helpers';
+
+try {
+  await saveSomething();
+  showSuccess('Saved successfully');
+} catch {
+  showError('Failed to save');
+}
+```

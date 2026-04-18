@@ -1,0 +1,100 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: smart-triage-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    image: redis:7-alpine
+    container_name: smart-triage-redis
+    restart: unless-stopped
+    # AOF + volume so in-flight BullMQ jobs survive a Redis restart.
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  backend:
+    build:
+      context: ./backend
+    container_name: smart-triage-backend
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    # Every var the backend reads is listed here, either pinned to a
+    # docker-correct value or interpolated from the repo-root .env
+    # (auto-loaded by compose). No env_file: backend/.env required.
+    environment:
+      # Pinned: docker network topology + sane defaults.
+      NODE_ENV: production
+      PORT: "3000"
+      MONGODB_URI: mongodb://mongo:27017/codematicticketsystem
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      THROTTLE_ENABLED: "true"
+      THROTTLE_TTL_MS: "60000"
+      THROTTLE_LIMIT: "100"
+      # Optional overrides — fall back to a sensible default if unset.
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1d}
+      OPENAI_TRIAGE_MODEL: ${OPENAI_TRIAGE_MODEL:-gpt-4o-mini}
+      # Secrets / user-supplied — empty if unset, breaks gracefully:
+      # missing OPENAI key → triage retries then marks tickets failed;
+      # missing registration secrets → /auth/register returns 401.
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      JWT_SECRET: ${JWT_SECRET:-}
+      AGENT_REGISTRATION_SECRET: ${AGENT_REGISTRATION_SECRET:-}
+      ADMIN_REGISTRATION_SECRET: ${ADMIN_REGISTRATION_SECRET:-}
+      # Optional Sentry wiring.
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENV: ${SENTRY_ENV:-}
+      SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0}
+      SENTRY_PROFILES_SAMPLE_RATE: ${SENTRY_PROFILES_SAMPLE_RATE:-0}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      # NEXT_PUBLIC_API_BASE_URL is baked into the browser bundle at build
+      # time, so it must be a host-reachable URL — not the docker hostname.
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:3001
+        NEXT_PUBLIC_APP_ENV: local
+        NEXT_PUBLIC_SHOW_REGISTER: "true"
+    container_name: smart-triage-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      # Server-side fetches from Next (e.g. /api/register-proxy) reach the
+      # backend over the docker network; localhost wouldn't resolve here.
+      API_BASE_URL: http://backend:3000
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:3001
+      NEXT_PUBLIC_APP_ENV: local
+      # Secret read by /api/register-proxy; must match the backend.
+      AGENT_REGISTRATION_SECRET: ${AGENT_REGISTRATION_SECRET:-}
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:
+  redis-data:

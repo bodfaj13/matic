@@ -1,0 +1,29 @@
+---
+description: Next.js App Router baseline for this frontend—scripts, tooling, and guardrails so changes stay compatible.
+globs: frontend/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Frontend Next.js stack
+
+## Baseline
+
+- App Router: routes live under `frontend/app/` (not `src/` until you migrate).
+- Scripts: `npm run dev` (`next dev`), `npm run build`, `npm run start`, `npm run lint` (`eslint`).
+- Stack: Next 16.x, React 19, TypeScript, Tailwind v4 (`tailwindcss`, `@tailwindcss/postcss`), ESLint (`eslint`, `eslint-config-next`).
+- Config: `next.config.ts`, `eslint.config.mjs`.
+
+## Do not
+
+- Replace Next scripts with Vite or add `react-router`; App Router owns routing.
+- Put browser-only APIs or client-only libraries in Server Components without checking docs.
+
+## Do
+
+- Use `"use client"` only where hooks, events, or browser APIs require it.
+- Expose browser env vars only as `NEXT_PUBLIC_*`.
+- Prefer `npm run lint` and `npm run build` before merge.
+
+## Optional tooling (not in baseline)
+
+- Prettier, Husky, lint-staged, Jest/Vitest—add in phased PRs; do not assume they exist in `package.json`.

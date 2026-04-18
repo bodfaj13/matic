@@ -1,0 +1,26 @@
+---
+description: Standard Tailwind class strings for form labels, inputs, and textareas (Smart Triage UI).
+globs: frontend/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Form field styling (frontend)
+
+Canonical tokens live in **`lib/form-field-styles.ts`**. Reference implementation: **`app/(public)/submit/page.tsx`**.
+
+## Rules
+
+- **Import** `formFieldLabelClass`, `formFieldInputPrimaryClass`, `formFieldInputMutedClass`, `formFieldTextareaMutedClass`, and trailing helpers from `@/lib/form-field-styles` instead of duplicating long `className` strings.
+- **Labels**: always `formFieldLabelClass` — small caps, bold, `text-stone-600`, `tracking-[0.08em]`.
+- **Inputs** (`formFieldInputPrimaryClass` and `formFieldInputMutedClass`): **both** are the same token — white field, `border-stone-200/90`, white on focus — so every control on a **`#F3F2F1`** card reads consistently. Use **primary** for the first/hero line if you want semantic clarity in code; use **muted** for subject, extra columns, etc. (names are legacy; styling matches).
+- **Textarea** (`formFieldTextareaMutedClass`): same white + stone border + primary focus ring as inputs; `px-3.5 py-3`, `resize-y` as needed.
+- **Focus**: marketing inputs use **`focus-visible:border-primary/55`** with **`ring-0`** and **`outline-none`** so focus does not stack with the global `*` outline or the shadcn `Input` default ring (avoids “double” / inset-looking focus).
+- **Trailing icons** (check, password toggle): `formFieldInputPrimaryWithTrailingClass()` or `formFieldInputWithTrailingClass("primary" | "muted")` so padding clears the icon (`pr-10` / `pr-11`). `"muted"` matches primary visually.
+- **Errors**: one line under the control, `className="text-xs text-destructive"`.
+
+## Avoid
+
+- One-off `rounded-lg` / `bg-input` on marketing-style forms unless you are inside shadcn defaults **and** intentionally breaking from this rail.
+- `NEXT_PUBLIC_*` or theme tokens on labels if it drifts from `text-stone-600` for this product surface (keep labels aligned with submit).
+
+When adding a new form page, match **submit** first; extend **`lib/form-field-styles.ts`** only if you need a third variant used in two or more places.

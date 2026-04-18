@@ -1,0 +1,49 @@
+---
+description: Map API validation errors to react-hook-form fields via getFieldErrorsFromApiResponse (frontend).
+globs: frontend/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# API field errors → forms (frontend)
+
+The backend may return field errors at **`response.data.errors`** (flat) or under **`response.data.details.errors`** (e.g. Nest `BadRequestException`). Do not branch on `error?.response?.data?.errors` alone.
+
+## Required pattern
+
+1. Import from `@/lib/api/types` once that module exists:
+
+   `import { type BaseResponse, getFieldErrorsFromApiResponse } from '@/lib/api/types';`
+
+2. In `catch`, normalize once and map to the form:
+
+```typescript
+import { logError } from '@/app/utils/logger';
+
+try {
+  await submitForm(values);
+} catch (err) {
+  const error = err as import('axios').AxiosError<BaseResponse>;
+  const fieldErrors = getFieldErrorsFromApiResponse(error?.response?.data);
+  if (fieldErrors && Object.keys(fieldErrors).length > 0) {
+    Object.entries(fieldErrors).forEach(([key, value]) => {
+      if (key in form.getValues()) {
+        form.setError(key as keyof YourSchema, { message: value });
+      }
+    });
+  } else {
+    logError(error.response?.data?.message ?? 'Request failed', error);
+    // Also surface to the user via your toast helper when available.
+  }
+}
+```
+
+Extend **`getFieldErrorsFromApiResponse`** in `lib/api/types.ts` when new error shapes appear—do not duplicate parsing in components.
+
+## Anti-pattern
+
+```typescript
+// ❌ Misses nested `details.errors`
+if (error?.response?.data?.errors) {
+  Object.entries(error.response.data.errors) ...
+}
+```

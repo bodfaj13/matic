@@ -1,0 +1,47 @@
+# Local / agent tooling
+.claude/
+
+# Dependencies
+node_modules/
+
+# Environment and secrets
+.env
+
+# Next.js (frontend)
+frontend/.next/
+frontend/out/
+frontend/.vercel/
+
+# NestJS (backend)
+backend/dist/
+backend/build/
+
+# Test and coverage
+coverage/
+frontend/coverage/
+backend/coverage/
+*.lcov
+
+# Logs and debug
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE (keep shared editor config if you add it later)
+.idea/
+
+# Misc caches
+.cache/
+.turbo/
+*.swp
+*.swo
