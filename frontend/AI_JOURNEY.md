@@ -54,14 +54,6 @@ This document satisfies the Codematic **AI-first workflow**: representative prom
 
 **Outcome:** Added `jest`, `@testing-library/react`, `@testing-library/jest-dom`, `jest-environment-jsdom`, `@swc/jest` (faster TypeScript transform than ts-jest, no Next config needed), and the `test` / `test:cov` scripts. `jest.config.ts` scopes `collectCoverageFrom` to `lib/**` + `app/utils/**` so UI rendering and route files don't dilute the percentage. 15 spec files, **91 tests, all passing, 97.88% statements / 92.07% branches**. Heaviest spec is `lib/api/tickets/use-tickets.spec.ts` which uses `renderHook` + a fresh `QueryClient` per test to prove the optimistic-update triad: assert the cache is patched _before_ the mutation promise resolves, then assert it's restored to the snapshot when the request rejects, then assert `showError` is called via a mocked `@/app/utils/toast-helpers`. Component render tests for `TicketsKanban` itself were intentionally skipped — would have needed a dnd-kit pointer-event shim for very little marginal coverage gain over the hook + pure-function tests.
 
-## AI failure encountered
-
-**Symptom:** An early `app/utils/logger.ts` used **`import.meta.env.VITE_APP_ENV`**, which matches a Vite app, not this Next.js frontend. Verbose logging never keyed off the intended env and could confuse future env wiring.
-
-**How we caught it:** Code review against the stated stack (Next 16 + `package.json` scripts) and mismatch with `NEXT_PUBLIC_*` conventions.
-
-**Fix:** Rewrote the logger to use **`process.env.NODE_ENV`** and **`NEXT_PUBLIC_APP_ENV`** (`local` | `test` for verbose), documented the variables in **`frontend/.env.example`**, and aligned **`logger-usage.mdc`** with named exports (`log`, `logInfo`, `logDebug`, `logWarn`, `logError`, `logGroup`, `logGroupEnd`).
-
 ## AI failure encountered (kanban DnD)
 
 **Symptom:** The first plan for the kanban DnD work proposed keeping the existing inline `→ Open / → In progress / → Resolved` buttons "as a fallback" alongside the new drag-and-drop, citing accessibility. The actual brief was simply to make cards draggable — `@dnd-kit/core`'s `KeyboardSensor` already covers keyboard users, so the buttons would have been visual noise duplicating a capability we were adding.
@@ -71,14 +63,6 @@ This document satisfies the Codematic **AI-first workflow**: representative prom
 **Fix:** Updated the plan to delete the buttons outright, dropped the now-unused `isUpdating` prop on `<TicketsKanban>` at the call site in `app/(dashboard)/triage/page.tsx`, and relied on dnd-kit's built-in `KeyboardSensor` (Space → arrows → Space) for keyboard accessibility, with `aria-roledescription="draggable ticket"` on cards and an `aria-label` on each column for screen-reader clarity.
 
 **Lesson:** When a brief asks to _change_ an interaction, default to replacement, not coexistence. Keeping legacy controls "just in case" was hedging, not helpfulness — and it would have left the cards visually busier than the new affordance warranted.
-
-## Additional issue resolved during documentation cleanup
-
-**Symptom:** After rewriting the setup handoff, a **duplicate block** of the old Vite-specific content was accidentally left appended to the same markdown file, creating conflicting instructions in one document.
-
-**How we caught it:** Markdown lint (multiple `h1`s) and manual read-through of the file tail.
-
-**Fix:** Removed the duplicate section so only the Next.js + Smart Triage version remained (before the file was deleted in favor of `.cursor` assets).
 
 ## Additional issue resolved during env compaction
 

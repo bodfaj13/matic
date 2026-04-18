@@ -72,22 +72,6 @@ This document satisfies the Codematic **AI-first workflow**: representative prom
 
 **Fix:** Centralized expiry handling in a small helper (`src/auth/jwt-expiry.ts`) that parses values like `1d` or `7d` into **seconds** (a `number`), which `jsonwebtoken` accepts reliably, and kept `JWT_EXPIRES_IN` in `.env` human-readable.
 
-## Additional issue resolved during refinement
-
-**Symptom:** After renaming admin queue monitoring from email to triage, the app failed at startup with `UnknownDependenciesException` for `BullQueue_triage`.
-
-**How we caught it:** Runtime logs showed `TriageBullMqController` could not resolve the `BullQueue_triage` provider.
-
-**Fix:** Updated `AppModule` queue registration from `BullModule.registerQueue({ name: 'email' })` to `BullModule.registerQueue({ name: 'triage' })`, then renamed the controller/spec filenames and imports to keep naming consistent (`triage-bullmq.controller.ts` and `.spec.ts`).
-
-## Additional issue resolved during setup alignment
-
-**Symptom:** API prefix values drifted during iterative setup, leaving mixed references to `api/v1` and `api/v2` across code/docs.
-
-**How we caught it:** Workspace-wide search and validation passes surfaced inconsistent route strings.
-
-**Fix:** Updated all active references to `api/v1` and re-verified with build/tests.
-
 ## AI failure encountered (e2e DB isolation)
 
 **Symptom:** First pass at e2e isolation guarded the `MONGODB_URI` override with the same `??` fallback the existing secrets used (`process.env.MONGODB_URI ?? '…/codematicticketsystem-e2e'`). The reasoning was "let CI override by exporting MONGODB_URI." It seemed safe — but after the change shipped, e2e tests still wrote to the developer's MongoDB Atlas cluster and wiped its `tickets` and `users` collections.
