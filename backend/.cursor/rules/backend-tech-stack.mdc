@@ -1,0 +1,22 @@
+---
+description: Backend tech stack and runtime architecture context for NestJS services.
+alwaysApply: true
+---
+
+# Backend Tech Stack
+
+- Framework: NestJS 11 with TypeScript 5.7+ (ES2023, nodenext modules).
+- Database: MongoDB with Mongoose (`@nestjs/mongoose`, `mongoose`).
+- Queues: BullMQ with Redis (`@nestjs/bullmq`, `bullmq`, `ioredis`).
+- Auth: JWT + Passport (`@nestjs/jwt`, `@nestjs/passport`, `passport-jwt`, `passport-local`) and `bcrypt`.
+- Security and validation: `helmet`, global validation pipe with `class-validator` and `class-transformer`.
+- API docs: Swagger at `/api/v1/docs` in local/dev environments.
+- Realtime: Socket.IO via Nest websockets and `IoAdapter` registration in bootstrap.
+- Rate limiting: `@nestjs/throttler` with `ConditionalThrottlerGuard`.
+- Observability: Sentry (`src/instrument.ts`, `SentryModule`, `SentryGlobalFilter`).
+- Testing and quality: Jest, ESLint flat config, Prettier.
+
+# Bootstrap and Root Wiring
+
+- `src/main.ts` sets global prefix `api/v1`, security middleware, validation, conditional Swagger, and web socket adapter.
+- `src/app.module.ts` wires config, Sentry, Mongoose, Bull, throttling, global filters/guards, and request logging middleware.

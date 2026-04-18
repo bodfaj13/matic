@@ -1,0 +1,13 @@
+node_modules
+dist
+coverage
+.env
+.env.*
+*.log
+.git
+.gitignore
+.DS_Store
+**/*.spec.ts
+test
+README.md
+AI_JOURNEY.md

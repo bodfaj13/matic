@@ -1,0 +1,40 @@
+---
+description: NestJS backend conventions for modules, schemas, DTOs, controllers, services, and API behavior.
+globs: src/**/*.ts
+alwaysApply: false
+---
+
+# Nest Backend Patterns
+
+## Modules
+
+- Keep one feature folder per domain with module/controller/service and local `dto/` + `schemas/` (or `entities/`) directories.
+- Each important module should include a local `README.md` describing purpose, flows, contracts, and operational notes.
+- Update the module `README.md` whenever behavior, API contracts, configuration, or architecture changes in that module.
+- Register feature schemas with `MongooseModule.forFeature([...])`.
+- Register Bull queues with `BullModule.registerQueue` when a feature enqueues jobs.
+- Export only providers needed by other modules.
+
+## Schemas and DTOs
+
+- Prefer `@Schema({ timestamps: true })` to keep `createdAt` and `updatedAt`.
+- Prefer soft delete patterns (`recordStatus`) unless hard delete is required.
+- Add indexes for query/filter fields.
+- Keep DTOs separated by purpose (create/update/response/query).
+- Validate DTO inputs with `class-validator` and document exposed DTOs with Swagger decorators.
+
+## Controllers and Services
+
+- Apply auth and permission guards where applicable.
+- Use consistent HTTP status codes and Nest exceptions.
+- Keep API responses aligned with shared wrappers (`BaseResponse<T>` and `PaginatedResponse<T>`).
+- Use structured logging in services and avoid `console.log` in production paths.
+- Scope data access by tenant/user and validate ownership for updates.
+- Prefer `.lean()` for read-only Mongo queries that return plain objects.
+
+## Cross-cutting Guidelines
+
+- Centralize feature flag reads via `ConfigService` or a dedicated provider.
+- For pagination, use a consistent strategy and include `totalCount` metadata where required.
+- Queue job names and payloads should be typed; design processors for idempotency and retries.
+- Never log sensitive data; include safe context like request/user identifiers.
